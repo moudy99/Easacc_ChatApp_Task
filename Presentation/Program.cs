@@ -1,10 +1,12 @@
 using Application.Helpers;
+using Application.Interfaces.Repository;
 using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
 using Application.Mapping;
 using Application.Services;
 using Core.Model;
 using Infrastructure;
+using Infrastructure.Repositories;
 using Infrastructure.UnitOfWork;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -40,7 +42,10 @@ namespace Presentation
             builder.Services.AddTransient<UserManager<ApplicationUser>>();
             builder.Services.AddTransient<SignInManager<ApplicationUser>>();
 
+            builder.Services.AddScoped<IChatRepository, ChatRepository>();
+            builder.Services.AddScoped<IChatService, ChatService>();
 
+            builder.Services.AddScoped<IMessageRepository, MessageRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
