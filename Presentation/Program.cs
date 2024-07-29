@@ -1,7 +1,11 @@
 using Application.Helpers;
+using Application.Interfaces.Services;
+using Application.Interfaces.UnitOfWork;
 using Application.Mapping;
+using Application.Services;
 using Core.Model;
 using Infrastructure;
+using Infrastructure.UnitOfWork;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,8 +35,14 @@ namespace Presentation
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
 
+
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddTransient<UserManager<ApplicationUser>>();
             builder.Services.AddTransient<SignInManager<ApplicationUser>>();
+
+
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 
 
             //CORS 
@@ -88,7 +98,7 @@ namespace Presentation
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+            pattern: "{controller=Account}/{action=Login}/{id?}");
 
             app.Run();
         }
