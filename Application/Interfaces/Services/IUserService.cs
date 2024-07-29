@@ -7,5 +7,7 @@ namespace Application.Interfaces.Services
     {
         Task<bool> CreateUserAsync(RegisterViewModel model, string password);
         Task<ApplicationUser> FindByEmailAsync(string email);
+
+        Task<ApplicationUser> UpdateUser(ApplicationUser user);
     }
 }
