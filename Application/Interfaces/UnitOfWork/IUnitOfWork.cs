@@ -1,4 +1,5 @@
-﻿namespace Application.Interfaces.UnitOfWork
+﻿
+namespace Application.Interfaces.UnitOfWork
 {
     public interface IUnitOfWork : IDisposable
     {

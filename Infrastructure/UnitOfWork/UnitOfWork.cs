@@ -13,7 +13,6 @@ namespace Infrastructure.UnitOfWork
         {
             _context = context;
             this.userManager = userManager;
-
         }
 
         public async Task<int> SaveChangesAsync()
