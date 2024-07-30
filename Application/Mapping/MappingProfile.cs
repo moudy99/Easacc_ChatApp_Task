@@ -60,6 +60,8 @@ namespace Application.Mapping
           .ForMember(dest => dest.SenderId, opt => opt.MapFrom(src => src.SenderId))
           .ForMember(dest => dest.RecipientId, opt => opt.MapFrom(src => src.RecipientId))
           .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content))
+          .ForMember(dest => dest.img, opt => opt.MapFrom(src => src.img))
+          .ForMember(dest => dest.img, opt => opt.Ignore())
     .ForMember(dest => dest.SentAt, opt => opt.MapFrom(src => DateTime.Now));
 
 

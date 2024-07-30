@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Services;
+﻿using Application.Helpers;
+using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
 using Application.ViewModel;
 using AutoMapper;
@@ -19,14 +20,20 @@ namespace Application.Services
             _userService = userService;
         }
 
-        public async Task SendMessageAsync(SendMessageViewModel model)
+        public async Task<Message> SendMessageAsync(SendMessageViewModel model)
         {
             var message = _mapper.Map<Message>(model);
+            if (model.img != null)
+            {
+                var imgUrl = await ImageSavingHelper.SaveOneImageAsync(model.img, "chatImages");
+                message.img = imgUrl;
+            }
             message.SentAt = DateTime.UtcNow;
             message.IsSeen = false;
 
             await _unitOfWork.MessageRepository.AddMessageAsync(message);
             await _unitOfWork.SaveChangesAsync();
+            return message;
         }
 
         public async Task UpdateOnlineStatusAsync(string userId, bool isOnline)

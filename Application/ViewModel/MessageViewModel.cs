@@ -9,7 +9,7 @@
         public string Content { get; set; }
         public DateTime SentAt { get; set; }
         public bool IsSeen { get; set; }
-
+        public string img { get; set; }
         public ApplicationUserViewModel Sender { get; set; }
         public ApplicationUserViewModel Recipient { get; set; }
     }
