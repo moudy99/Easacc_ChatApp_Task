@@ -25,15 +25,15 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> SendMessage(SendMessageViewModel messageViewModel)
+        public async Task<ActionResult> SendMessage([FromForm] SendMessageViewModel messageViewModel)
         {
             if (ModelState.IsValid)
             {
-                await _chatService.SendMessageAsync(messageViewModel);
+                var mess = await _chatService.SendMessageAsync(messageViewModel);
 
                 await _chatHubContext.Clients.User(messageViewModel.RecipientId).SendAsync("ReceiveMessage", messageViewModel);
 
-                return Ok();
+                return Json(mess);
             }
 
             return BadRequest("Invalid message data.");
@@ -66,6 +66,8 @@ namespace Presentation.Controllers
                     Name = u.Name,
                 }).ToListAsync();
 
+            var currentUser = await userManager.GetUserAsync(User);
+            ViewBag.currentUserId = currentUser.Id;
             return View(users);
         }
         [HttpGet]

@@ -1,4 +1,6 @@
-﻿namespace Application.ViewModel
+﻿using Microsoft.AspNetCore.Http;
+
+namespace Application.ViewModel
 {
     public class SendMessageViewModel
     {
@@ -8,6 +10,7 @@
         public string Content { get; set; }
         public string SentAt { get; set; }
 
+        public IFormFile? img { get; set; }
 
     }
 }

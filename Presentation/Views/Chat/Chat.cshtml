@@ -44,21 +44,36 @@
                 {
                     <img src="~/imgs/defualt-user-img.png" alt="@message.Sender.Name" class="user-image">
                 }
+
                 <div class="message-content">
-                    <p>@message.Content</p>
-                    <span class="message-time">@message.SentAt.ToString("HH:mm")</span>
+                    <div class="message-text @(string.IsNullOrWhiteSpace(message.img) ? "" : "time-text-align")">
+                        <p>@message.Content</p>
+                        <span class="message-time">@message.SentAt.ToString("HH:mm")</span>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(message.img))
+                    {
+                        <img class="message-img" src="http://localhost:35848/@message.img" />
+                    }
                 </div>
+
           
             </div>
         }
     </div>
 
     <div class="chat-footer">
-        <input type="text" id="messageInput" placeholder="write your message here...">
+        <div class="chat-actions">
+            <div id="previewArea" class="preview-area"></div>
+            <button id="sendImage" class="icon-button"><i class="fas fa-image"></i></button>
+            <button id="sendFile" class="icon-button"><i class="fas fa-file"></i></button>
+            <button id="sendVoice" class="icon-button"><i class="fas fa-microphone"></i></button>
+        </div>
+        <input type="text" id="messageInput" placeholder="write your message here..." maxlength="100">
+        <span id="charCounter">100</span>
         <button id="sendButton">Send</button>
+        <input type="file" id="imageInput" accept="image/*" style="display:none;">
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" style="display:none;">
     </div>
-</div>
-
 
 <script>
     window.chatData = {

@@ -87,12 +87,24 @@ body {
     background-color: #fff;
     max-height: calc(100vh - 140px);
 }
-
-.my-message {
-    display: flex;
-    justify-content: flex-start;
-    margin-bottom: 10px;
+.message-img{
+    width:100px;
 }
+.time-text-align {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+    .time-text-align p {
+        margin: 0px;
+        word-break: break-word;
+    }
+    .my-message {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 10px;
+    }
 
 .partner-message {
     display: flex;
@@ -196,3 +208,72 @@ body {
         background-color: red;
     }
 
+.chat-footer {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #f1f1f1;
+}
+
+.chat-actions {
+    display: flex;
+    align-items: center;
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+    font-size: 18px;
+    color: #555;
+}
+
+    .icon-button:hover {
+        color: #000;
+    }
+
+#messageInput {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+#charCounter {
+    margin-right: 10px;
+    font-size: 14px;
+    color: #999;
+}
+
+#sendButton {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    #sendButton:hover {
+        background-color: #0056b3;
+    }
+#previewArea {
+    position: relative;
+    width: 100px;
+    margin-right: 17px;
+    max-width: 200px;
+    text-overflow: ellipsis;
+}
+#previewArea img {
+    width: 100px;
+    border-radius:10px;
+}
+.delete-preview {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-color: #dc3545 !important;
+    padding: 1px 5px !important;
+}

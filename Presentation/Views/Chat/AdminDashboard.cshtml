@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Admin Dashboard";
     Layout = "_AdminDashboardLayout";
+    var currentUserId = ViewBag.currentUserId;
 }
 
 <div class="container mt-4">
@@ -19,6 +20,10 @@
         <tbody>
             @foreach (var user in Model)
             {
+                if(user.UserId == currentUserId)
+                {
+                    return;
+                }
                 <tr>
                     <td>@user.Name</td>
                     <td>

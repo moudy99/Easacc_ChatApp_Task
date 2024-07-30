@@ -6,7 +6,7 @@
         public string User1Id { get; set; }
         public string User2Id { get; set; }
         public DateTime CreatedAt { get; set; }
-
+        public string img { get; set; }
         public ApplicationUserViewModel User1 { get; set; }
         public ApplicationUserViewModel User2 { get; set; }
         public ICollection<MessageViewModel> Messages { get; set; }
