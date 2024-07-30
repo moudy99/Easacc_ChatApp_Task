@@ -17,7 +17,8 @@ namespace Application.Helpers
                 {
                     UserName = adminEmail,
                     Email = adminEmail.ToLower(),
-                    Name = "Admin"
+                    Name = "Admin",
+                    Role = "Admin",
 
                 };
 

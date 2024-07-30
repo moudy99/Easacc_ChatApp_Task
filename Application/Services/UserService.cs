@@ -20,6 +20,7 @@ namespace Application.Services
         public async Task<bool> CreateUserAsync(RegisterViewModel model, string password)
         {
             var user = _mapper.Map<ApplicationUser>(model);
+            user.Role = "User";
             user.UserName = model.Email.ToLower();
             user.Name = model.Name;
             var result = await _userManager.CreateAsync(user, password);

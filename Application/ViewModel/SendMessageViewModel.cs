@@ -1,19 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Application.ViewModel
+﻿namespace Application.ViewModel
 {
     public class SendMessageViewModel
     {
-        [Required]
-        public int ChatId { get; set; }
-
-        [Required]
+        public string ChatId { get; set; }
         public string SenderId { get; set; }
-
-        [Required]
         public string RecipientId { get; set; }
-
-        [Required]
         public string Content { get; set; }
+        public string SentAt { get; set; }
+
+
     }
 }

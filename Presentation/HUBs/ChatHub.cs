@@ -34,19 +34,25 @@ namespace Presentation.HUBs
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             var connectionId = Context.ConnectionId;
-
             var userConnection = await _dbContext.UserConnections
                 .FirstOrDefaultAsync(uc => uc.ConnectionId == connectionId);
 
             if (userConnection != null)
             {
-                _dbContext.UserConnections.Remove(userConnection);
-                await UpdateOnlineStatus(userConnection.UserId, false);
+                var userConnections = await _dbContext.UserConnections
+                    .Where(uc => uc.UserId == userConnection.UserId)
+                    .ToListAsync();
+
+                _dbContext.UserConnections.RemoveRange(userConnections);
+
                 await _dbContext.SaveChangesAsync();
+
+                await UpdateOnlineStatus(userConnection.UserId, false);
             }
 
             await base.OnDisconnectedAsync(exception);
         }
+
 
         private async Task UpdateOnlineStatus(string userId, bool isOnline)
         {
@@ -59,5 +65,7 @@ namespace Presentation.HUBs
                 await _dbContext.SaveChangesAsync();
             }
         }
+
+
     }
 }
