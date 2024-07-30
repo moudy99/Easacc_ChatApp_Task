@@ -10,41 +10,34 @@ namespace Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IUserService userService;
+        private readonly IUserService _userService;
 
         public ChatService(IUnitOfWork unitOfWork, IMapper mapper, IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            this.userService = userService;
+            _userService = userService;
         }
 
         public async Task SendMessageAsync(SendMessageViewModel model)
         {
-            var message = new Message
-            {
-                ChatId = model.ChatId,
-                SenderId = model.SenderId,
-                RecipientId = model.RecipientId,
-                Content = model.Content,
-                SentAt = DateTime.UtcNow,
-                IsSeen = false
-            };
+            var message = _mapper.Map<Message>(model);
+            message.SentAt = DateTime.UtcNow;
+            message.IsSeen = false;
 
             await _unitOfWork.MessageRepository.AddMessageAsync(message);
             await _unitOfWork.SaveChangesAsync();
-
         }
 
         public async Task UpdateOnlineStatusAsync(string userId, bool isOnline)
         {
-            var user = await userService.FindByEmailAsync(userId);
+            var user = await _userService.FindByEmailAsync(userId);
             if (user != null)
             {
                 user.IsOnline = isOnline;
                 user.LastSeen = DateTime.UtcNow;
 
-                userService.UpdateUser(user);
+                await _userService.UpdateUser(user);
                 await _unitOfWork.SaveChangesAsync();
             }
         }
@@ -54,5 +47,45 @@ namespace Application.Services
             var chat = await _unitOfWork.ChatRepository.GetChatByUsersAsync(user1Id, user2Id);
             return _mapper.Map<ChatViewModel>(chat);
         }
+
+        public async Task<IEnumerable<MessageViewModel>> GetMessagesAsync(int chatId)
+        {
+            var messages = await _unitOfWork.MessageRepository.GetMessagesByChatIdAsync(chatId);
+            return _mapper.Map<IEnumerable<MessageViewModel>>(messages);
+        }
+
+        public async Task MarkMessagesAsSeenAsync(int chatId)
+        {
+            var messages = await _unitOfWork.MessageRepository.GetMessagesByChatIdAsync(chatId);
+            var unseenMessages = messages.Where(m => !m.IsSeen).ToList();
+
+            foreach (var message in unseenMessages)
+            {
+                message.IsSeen = true;
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<ChatViewModel> EnsureChatExistsAsync(string user1Id, string user2Id)
+        {
+            var chat = await _unitOfWork.ChatRepository.GetChatByUsersAsync(user1Id, user2Id);
+
+            if (chat == null)
+            {
+                chat = new Chat
+                {
+                    User1Id = user1Id,
+                    User2Id = user2Id,
+                    CreatedAt = DateTime.Now
+                };
+
+                await _unitOfWork.ChatRepository.AddChatAsync(chat);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            return _mapper.Map<ChatViewModel>(chat);
+        }
+
     }
 }

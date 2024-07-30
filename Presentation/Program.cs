@@ -10,6 +10,7 @@ using Infrastructure.Repositories;
 using Infrastructure.UnitOfWork;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Presentation.HUBs;
 
 namespace Presentation
 {
@@ -101,6 +102,7 @@ namespace Presentation
             app.UseStaticFiles();
 
 
+            app.MapHub<ChatHub>("/chatHub");
             app.MapControllerRoute(
                 name: "default",
             pattern: "{controller=Account}/{action=Login}/{id?}");

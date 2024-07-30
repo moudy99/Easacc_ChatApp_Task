@@ -21,6 +21,7 @@ namespace Application.Services
         {
             var user = _mapper.Map<ApplicationUser>(model);
             user.UserName = model.Email.ToLower();
+            user.Name = model.Name;
             var result = await _userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
