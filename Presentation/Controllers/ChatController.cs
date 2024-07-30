@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces.Services;
 using Application.ViewModel;
 using Core.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -9,6 +10,7 @@ using Presentation.HUBs;
 
 namespace Presentation.Controllers
 {
+    [Authorize]
     public class ChatController : Controller
     {
         private readonly IHubContext<ChatHub> _chatHubContext;
@@ -22,14 +24,14 @@ namespace Presentation.Controllers
             this.userManager = userManager;
         }
 
-        [HttpPost("SendMessage")]
-        public async Task<IActionResult> SendMessage(SendMessageViewModel model)
+        [HttpPost]
+        public async Task<ActionResult> SendMessage(SendMessageViewModel messageViewModel)
         {
             if (ModelState.IsValid)
             {
-                await _chatService.SendMessageAsync(model);
+                await _chatService.SendMessageAsync(messageViewModel);
 
-                await _chatHubContext.Clients.User(model.RecipientId).SendAsync("ReceiveMessage", model);
+                await _chatHubContext.Clients.User(messageViewModel.RecipientId).SendAsync("ReceiveMessage", messageViewModel);
 
                 return Ok();
             }
@@ -52,6 +54,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AdminDashboard()
         {
             var users = await userManager.Users
@@ -69,15 +72,39 @@ namespace Presentation.Controllers
         public async Task<IActionResult> Chat(string userId)
         {
             var currentUser = await userManager.GetUserAsync(User);
+
+            var isAdmin = await userManager.IsInRoleAsync(currentUser, "Admin");
+
+            if (isAdmin)
+            {
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return BadRequest("User ID must be provided for admins.");
+                }
+            }
+            else
+            {
+                var adminUsers = await userManager.GetUsersInRoleAsync("Admin");
+                var adminUser = adminUsers.FirstOrDefault();
+                userId = adminUser?.Id;
+
+                if (userId == null)
+                {
+                    return BadRequest("No admin user found.");
+                }
+            }
+
             var chat = await _chatService.EnsureChatExistsAsync(currentUser.Id, userId);
-            var user = await userManager.GetUserAsync(User);
+
             if (chat != null)
             {
-                ViewBag.currentUserId = user.Id;
-
+                ViewBag.currentUserId = currentUser.Id;
+                ViewBag.currentUserRole = currentUser.Role;
             }
+
             return View(chat);
         }
+
 
     }
 }

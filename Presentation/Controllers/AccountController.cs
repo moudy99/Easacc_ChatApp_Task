@@ -84,7 +84,7 @@ namespace Presentation.Controllers
                         }
                         else if (roles.Contains("User"))
                         {
-                            return RedirectToAction("UserChat", "Chat");
+                            return RedirectToAction("Chat", "Chat");
                         }
                     }
                     else
@@ -99,13 +99,13 @@ namespace Presentation.Controllers
             }
             return View(loginViewModel);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login", "Account");
         }
+
     }
 }

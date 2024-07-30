@@ -54,6 +54,15 @@ namespace Application.Mapping
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName))
                 .ForMember(dest => dest.IsOnline, opt => opt.MapFrom(src => src.IsOnline));
+
+            CreateMap<SendMessageViewModel, Message>()
+          .ForMember(dest => dest.ChatId, opt => opt.MapFrom(src => src.ChatId))
+          .ForMember(dest => dest.SenderId, opt => opt.MapFrom(src => src.SenderId))
+          .ForMember(dest => dest.RecipientId, opt => opt.MapFrom(src => src.RecipientId))
+          .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content))
+    .ForMember(dest => dest.SentAt, opt => opt.MapFrom(src => DateTime.Now));
+
+
         }
     }
 
