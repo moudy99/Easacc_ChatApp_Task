@@ -3,6 +3,7 @@ namespace Core.Model
 {
     public class ApplicationUser : IdentityUser
     {
+        public string Name { get; set; }
         public DateTime LastSeen { get; set; }
         public bool IsOnline { get; set; }
 

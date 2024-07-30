@@ -1,6 +1,7 @@
-﻿using Application.ViewModel;
+﻿using Application.Interfaces.Services;
+using Application.ViewModel;
 using Core.Model;
-using Infrastructure;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -11,34 +12,24 @@ namespace Presentation.Controllers
     public class ChatController : Controller
     {
         private readonly IHubContext<ChatHub> _chatHubContext;
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IChatService _chatService;
+        private readonly UserManager<ApplicationUser> userManager;
 
-        public ChatController(IHubContext<ChatHub> chatHubContext, ApplicationDbContext dbContext)
+        public ChatController(IHubContext<ChatHub> chatHubContext, IChatService chatService, UserManager<ApplicationUser> userManager)
         {
-            this._chatHubContext = chatHubContext;
-            this._dbContext = dbContext;
+            _chatHubContext = chatHubContext;
+            _chatService = chatService;
+            this.userManager = userManager;
         }
 
-        [HttpPost]
+        [HttpPost("SendMessage")]
         public async Task<IActionResult> SendMessage(SendMessageViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var message = new Message
-                {
-                    ChatId = model.ChatId,
-                    SenderId = model.SenderId,
-                    RecipientId = model.RecipientId,
-                    Content = model.Content,
-                    SentAt = DateTime.UtcNow,
-                    IsSeen = false
-                };
+                await _chatService.SendMessageAsync(model);
 
-                _dbContext.Messages.Add(message);
-                await _dbContext.SaveChangesAsync();
-
-                // Notify recipient via SignalR
-                await _chatHubContext.Clients.User(model.RecipientId).SendAsync("ReceiveMessage", message);
+                await _chatHubContext.Clients.User(model.RecipientId).SendAsync("ReceiveMessage", model);
 
                 return Ok();
             }
@@ -46,33 +37,47 @@ namespace Presentation.Controllers
             return BadRequest("Invalid message data.");
         }
 
-        [HttpGet]
+        [HttpGet("GetMessages")]
         public async Task<IActionResult> GetMessages(int chatId)
         {
-            var messages = await _dbContext.Messages
-                .Where(m => m.ChatId == chatId)
-                .OrderBy(m => m.SentAt)
-                .ToListAsync();
-
-            return Json(messages);
+            var messages = await _chatService.GetMessagesAsync(chatId);
+            return Ok(messages);
         }
 
-        [HttpPost]
+        [HttpPost("MarkMessagesAsSeen")]
         public async Task<IActionResult> MarkMessagesAsSeen(int chatId)
         {
-            var messages = await _dbContext.Messages
-                .Where(m => m.ChatId == chatId && !m.IsSeen)
-                .ToListAsync();
-
-            foreach (var message in messages)
-            {
-                message.IsSeen = true;
-            }
-
-            _dbContext.Messages.UpdateRange(messages);
-            await _dbContext.SaveChangesAsync();
-
+            await _chatService.MarkMessagesAsSeenAsync(chatId);
             return Ok();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> AdminDashboard()
+        {
+            var users = await userManager.Users
+                .Select(u => new ApplicationUserViewModel
+                {
+                    UserId = u.Id,
+                    UserName = u.UserName,
+                    IsOnline = u.IsOnline,
+                    Name = u.Name,
+                }).ToListAsync();
+
+            return View(users);
+        }
+        [HttpGet]
+        public async Task<IActionResult> Chat(string userId)
+        {
+            var currentUser = await userManager.GetUserAsync(User);
+            var chat = await _chatService.EnsureChatExistsAsync(currentUser.Id, userId);
+            var user = await userManager.GetUserAsync(User);
+            if (chat != null)
+            {
+                ViewBag.currentUserId = user.Id;
+
+            }
+            return View(chat);
+        }
+
     }
 }

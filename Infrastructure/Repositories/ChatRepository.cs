@@ -18,10 +18,17 @@ namespace Infrastructure.Repositories
             return await _context.Chats
                 .Include(c => c.User1)
                 .Include(c => c.User2)
+                .Include(c => c.Messages)
                 .FirstOrDefaultAsync(c =>
                     (c.User1Id == user1Id && c.User2Id == user2Id) ||
                     (c.User1Id == user2Id && c.User2Id == user1Id));
         }
+
+        public async Task AddChatAsync(Chat chat)
+        {
+            await _context.Chats.AddAsync(chat);
+        }
+
 
         public async Task<IEnumerable<Chat>> GetAllChatsAsync()
         {
@@ -31,10 +38,6 @@ namespace Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task AddChatAsync(Chat chat)
-        {
-            await _context.Chats.AddAsync(chat);
-        }
 
         public async Task UpdateChatAsync(Chat chat)
         {
