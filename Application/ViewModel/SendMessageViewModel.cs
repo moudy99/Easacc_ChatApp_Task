@@ -11,6 +11,7 @@ namespace Application.ViewModel
         public string SentAt { get; set; }
 
         public IFormFile? img { get; set; }
+        public IFormFile? voice { get; set; }
 
         public IFormFile? document { get; set; }
 
