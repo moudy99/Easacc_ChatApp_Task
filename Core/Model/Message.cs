@@ -11,6 +11,7 @@
         public bool IsSeen { get; set; }
         public Chat Chat { get; set; }
         public string? img { get; set; }
+        public string? document { get; set; }
         public ApplicationUser Sender { get; set; }
         public ApplicationUser Recipient { get; set; }
     }

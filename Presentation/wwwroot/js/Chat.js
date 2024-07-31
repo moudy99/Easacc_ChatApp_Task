@@ -4,12 +4,9 @@ const chatId = window.chatData.chatId;
 const chatBody = document.getElementById("chatBody");
 const previewArea = document.getElementById("previewArea");
 
-
-
 function scrollToBottom() {
     try {
-        this.chatBody.nativeElement.scrollTop =
-            this.chatBody.nativeElement.scrollHeight;
+        chatBody.scrollTop = chatBody.scrollHeight;
     } catch (err) {
         console.error('Error scrolling to bottom:', err);
     }
@@ -57,16 +54,20 @@ document.getElementById("sendFile").addEventListener("click", function () {
 document.getElementById("imageInput").addEventListener("change", function () {
     if (this.files && this.files[0]) {
         previewFile(this.files[0], "image");
+        document.getElementById("fileInput").value = ""; // Clear file input
     }
 });
 
 document.getElementById("fileInput").addEventListener("change", function () {
     if (this.files && this.files[0]) {
         previewFile(this.files[0], "file");
+        document.getElementById("imageInput").value = ""; // Clear image input
     }
 });
 
 function previewFile(file, type) {
+    previewArea.innerHTML = ""; // Clear previous preview
+
     const previewDiv = document.createElement("div");
     previewDiv.className = "preview-div";
 
@@ -88,15 +89,16 @@ function previewFile(file, type) {
     deleteButton.innerHTML = "&times;";
     deleteButton.addEventListener("click", function () {
         previewArea.removeChild(previewDiv);
+        document.getElementById("imageInput").value = "";
+        document.getElementById("fileInput").value = "";
     });
 
     previewDiv.appendChild(deleteButton);
     previewArea.appendChild(previewDiv);
 }
-
 function sendMessage() {
     const content = document.getElementById("messageInput").value.trim();
-    if (content !== "") {
+    if (content !== "" || document.getElementById("imageInput").files.length > 0 || document.getElementById("fileInput").files.length > 0) {
         const currentTime = new Date();
         const hours = currentTime.getHours().toString().padStart(2, '0');
         const minutes = currentTime.getMinutes().toString().padStart(2, '0');
@@ -108,68 +110,52 @@ function sendMessage() {
         formData.append("RecipientId", partnerId);
         formData.append("Content", content);
         formData.append("SentAt", currentTime);
-        if (imageInput.files.length > 0) {
-            formData.append("img", imageInput.files[0]);
+
+        if (document.getElementById("imageInput").files.length > 0) {
+            formData.append("img", document.getElementById("imageInput").files[0]);
         }
+        if (document.getElementById("fileInput").files.length > 0) {
+            formData.append("document", document.getElementById("fileInput").files[0]);
+        }
+
         fetch('/Chat/SendMessage', {
             method: 'POST',
             body: formData
         })
             .then(response => {
-                
                 if (!response.ok) {
                     return response.text().then(text => { throw new Error(text); });
                 }
                 return response.json();
             })
-                .then(data => {
-                    console.log('Response Data:', data);
-                    const message = ` <div class="partner-message">
-            <div class="message-content">
-                <div class="message-text ${data.img ? 'time-text-align' : ''}">
-                    <p>${content}</p>
-                    <span class="message-time">${formattedTime}</span>
+            .then(data => {
+                console.log('Response Data:', data);
+                const message = `
+                <div class="partner-message">
+                    <div class="message-content">
+                        <div class="message-text ${data.img || data.document ? 'time-text-align' : ''}">
+                            <p>${content}</p>
+                            <span class="message-time">${formattedTime}</span>
+                        </div>
+                        ${data.img ? `<img class="message-img" src="http://localhost:35848/${data.img}" />` : ''}
+                        ${data.document ? `
+                            <a href="http://localhost:35848/${data.document}" target="_blank" class="document-link">
+                                <i class="fas fa-file-download"></i> Download Document
+                            </a>
+                        ` : ''}
+                    </div>
                 </div>
-                ${data.img ? `<img class="message-img" src="http://localhost:35848/${data.img}" />` : ''}
-            </div>
-        </div>
-    `;
-                    chatBody.insertAdjacentHTML('beforeend', message);
-                    chatBody.scrollTop = chatBody.scrollHeight;
-                    document.getElementById("messageInput").value = "";
-                    document.getElementById("imageInput").value = "";
-                    previewArea.innerHTML = "";
-                    document.getElementById("charCounter").textContent = 100;
-                })
+            `;
+                chatBody.insertAdjacentHTML('beforeend', message);
+                chatBody.scrollTop = chatBody.scrollHeight;
+                document.getElementById("messageInput").value = "";
+                document.getElementById("imageInput").value = "";
+                document.getElementById("fileInput").value = "";
+                previewArea.innerHTML = "";
+                document.getElementById("charCounter").textContent = 100;
+            })
             .catch(error => console.error('Error:', error));
     }
-}
-
-function sendFile(file, type) {
-    const formData = new FormData();
-    formData.append("ChatId", chatId);
-    formData.append("SenderId", currentUserId);
-    formData.append("RecipientId", partnerId);
-    formData.append("SentAt", new Date());
-
-    if (type === "image") {
-        formData.append("Image", file);
-    } else if (type === "file") {
-        formData.append("File", file);
-    }
-
-    fetch('/Chat/SendFile', {
-        method: 'POST',
-        body: formData
-    })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => { throw new Error(text); });
-            }
-
-            console.log(`${type.charAt(0).toUpperCase() + type.slice(1)} sent successfully.`);
-        })
-        .catch(error => console.error(`Error sending ${type}:`, error));
 }
 
 function addMessageToChat(message) {
@@ -193,9 +179,29 @@ function addMessageToChat(message) {
     contentDiv.appendChild(contentP);
     contentDiv.appendChild(timeSpan);
 
+    if (message.img) {
+        const img = document.createElement("img");
+        img.className = "message-img";
+        img.src = `http://localhost:35848/${message.img}`;
+        contentDiv.appendChild(img);
+    }
+
+    if (message.document) {
+        const docLink = document.createElement("a");
+        docLink.href = `http://localhost:35848/${message.document}`;
+        docLink.className = "document-link";
+        docLink.target = "_blank";
+
+        const icon = document.createElement("i");
+        icon.className = "fas fa-file-download";
+
+        docLink.appendChild(icon);
+        docLink.appendChild(document.createTextNode(" Download Document"));
+
+        contentDiv.appendChild(docLink);
+    }
+
     messageDiv.appendChild(contentDiv);
     chatBody.appendChild(messageDiv);
     chatBody.scrollTop = chatBody.scrollHeight;
 }
-
-

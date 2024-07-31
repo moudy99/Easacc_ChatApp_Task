@@ -264,7 +264,7 @@ body {
     width: 100px;
     margin-right: 17px;
     max-width: 200px;
-    text-overflow: ellipsis;
+   overflow:hidden;
 }
 #previewArea img {
     width: 100px;
@@ -277,3 +277,24 @@ body {
     background-color: #dc3545 !important;
     padding: 1px 5px !important;
 }
+
+.document-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    margin-top: 5px;
+    transition: background-color 0.3s ease;
+}
+
+    .document-link:hover {
+        background-color: #e0e0e0;
+    }
+
+    .document-link i {
+        margin-right: 5px;
+    }

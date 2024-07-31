@@ -28,6 +28,12 @@ namespace Application.Services
                 var imgUrl = await ImageSavingHelper.SaveOneImageAsync(model.img, "chatImages");
                 message.img = imgUrl;
             }
+
+            if (model.document != null)
+            {
+                var documentUrl = await DocumentSavingHelper.SaveOneDocumentAsync(model.document, "documents");
+                message.document = documentUrl;
+            }
             message.SentAt = DateTime.UtcNow;
             message.IsSeen = false;
 
