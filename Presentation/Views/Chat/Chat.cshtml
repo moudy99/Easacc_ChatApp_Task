@@ -46,7 +46,9 @@
                 }
 
                 <div class="message-content">
-                    <div class="message-text @((string.IsNullOrWhiteSpace(message.img) || string.IsNullOrWhiteSpace(message.document)) ? "" : "time-text-align")">
+                    <div class="@(string.IsNullOrWhiteSpace(message.img) || string.IsNullOrWhiteSpace(message.document) ? "message-text time-text-align" : "message-text")">
+
+                   
                         <p>@message.Content</p>
                         <span class="message-time">@message.SentAt.ToString("HH:mm")</span>
                     </div>
@@ -60,6 +62,13 @@
                         <a href="http://localhost:35848/${@message.document}" target="_blank" class="document-link">
                             <i class="fas fa-file-download"></i> Download Document
                         </a>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(message.voice))
+                    {
+
+                        <audio controls>
+                            <source src="@message.voice" type="audio/wav">
+                        </audio>
                     }
              
                 </div>
@@ -75,6 +84,7 @@
             <button id="sendImage" class="icon-button"><i class="fas fa-image"></i></button>
             <button id="sendFile" class="icon-button"><i class="fas fa-file"></i></button>
             <button id="sendVoice" class="icon-button"><i class="fas fa-microphone"></i></button>
+            <span id="recordingTime" style="display: none;">00:00</span>
         </div>
         <input type="text" id="messageInput" placeholder="write your message here..." maxlength="100">
         <span id="charCounter">100</span>

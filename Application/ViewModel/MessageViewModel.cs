@@ -11,6 +11,7 @@
         public bool IsSeen { get; set; }
         public string img { get; set; }
         public string document { get; set; }
+        public string voice { get; set; }
         public ApplicationUserViewModel Sender { get; set; }
         public ApplicationUserViewModel Recipient { get; set; }
     }

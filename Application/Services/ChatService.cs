@@ -34,6 +34,12 @@ namespace Application.Services
                 var documentUrl = await DocumentSavingHelper.SaveOneDocumentAsync(model.document, "documents");
                 message.document = documentUrl;
             }
+
+            if (model.voice != null)
+            {
+                var voiceUrl = await VoiceSavingHelper.SaveVoiceAsync(model.voice, "voices");
+                message.voice = voiceUrl;
+            }
             message.SentAt = DateTime.UtcNow;
             message.IsSeen = false;
 
