@@ -11,6 +11,12 @@ This is a simple MVC-based chat application that allows an admin to chat with mu
 - **User Inactivity Detection**: Automatic message sent to users after 1 minute of inactivity.
 - **Character and Time Limits**: Maximum character and time limits for user messages.
 
+
+### Admin Account
+- **Email**: admin@gmail.com
+- **password**: Admin@123
+
+
 ## Technologies Used
 
 - **Backend**: ASP.NET MVC, Entity Framework
@@ -33,4 +39,5 @@ The application follows the Clean Architecture pattern and is divided into four 
 - **UnitOfWork**: To manage database transactions and coordinate the work of multiple repositories.
 - **Service Layer**: To encapsulate the business logic of the application and Mapping.
 - **AutoMapper**: For object-object mapping between DTOs and entities.
+
 
