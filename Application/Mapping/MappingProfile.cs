@@ -65,6 +65,10 @@ namespace Application.Mapping
     .ForMember(dest => dest.SentAt, opt => opt.MapFrom(src => DateTime.Now));
 
 
+            CreateMap<Message, SendMessageResponse>()
+                .ForMember(dest => dest.SenderName, opt => opt.MapFrom(src => src.Sender.Name))
+                .ForMember(dest => dest.RecipientName, opt => opt.MapFrom(src => src.Recipient.Name))
+                .ForMember(dest => dest.IsRecipientOnline, opt => opt.MapFrom(src => src.Recipient.IsOnline));
         }
     }
 

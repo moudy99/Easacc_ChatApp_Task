@@ -24,32 +24,41 @@ namespace Presentation.Controllers
             this.userManager = userManager;
         }
 
+
         [HttpPost]
         public async Task<ActionResult> SendMessage([FromForm] SendMessageViewModel messageViewModel)
         {
             if (ModelState.IsValid)
             {
-                var mess = await _chatService.SendMessageAsync(messageViewModel);
+                var sendMessageResponse = await _chatService.SendMessageAsync(messageViewModel);
+                await _chatHubContext.Clients.User(messageViewModel.RecipientId).SendAsync("ReceiveMessage", sendMessageResponse);
 
-                await _chatHubContext.Clients.User(messageViewModel.RecipientId).SendAsync("ReceiveMessage", messageViewModel);
-
-                return Json(mess);
+                return Json(sendMessageResponse);
             }
 
             return BadRequest("Invalid message data.");
         }
 
+
         [HttpGet("GetMessages")]
         public async Task<IActionResult> GetMessages(int chatId)
         {
+            var user = await userManager.GetUserAsync(User);
+            var id = user.Id;
             var messages = await _chatService.GetMessagesAsync(chatId);
+            if (messages != null)
+            {
+                await _chatService.MarkMessagesAsSeenAsync(chatId, id);
+            }
             return Ok(messages);
         }
 
         [HttpPost("MarkMessagesAsSeen")]
         public async Task<IActionResult> MarkMessagesAsSeen(int chatId)
         {
-            await _chatService.MarkMessagesAsSeenAsync(chatId);
+            var user = await userManager.GetUserAsync(User);
+            var id = user.Id;
+            await _chatService.MarkMessagesAsSeenAsync(chatId, id);
             return Ok();
         }
 
@@ -100,6 +109,12 @@ namespace Presentation.Controllers
 
             if (chat != null)
             {
+
+                if (chat.Messages != null)
+                {
+                    await _chatService.MarkMessagesAsSeenAsync(chat.ChatId, currentUser.Id);
+                }
+
                 ViewBag.currentUserId = currentUser.Id;
                 ViewBag.currentUserRole = currentUser.Role;
             }

@@ -15,5 +15,7 @@ namespace Application.ViewModel
 
         public IFormFile? document { get; set; }
 
+
+
     }
 }

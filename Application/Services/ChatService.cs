@@ -20,7 +20,7 @@ namespace Application.Services
             _userService = userService;
         }
 
-        public async Task<Message> SendMessageAsync(SendMessageViewModel model)
+        public async Task<SendMessageResponse> SendMessageAsync(SendMessageViewModel model)
         {
             var message = _mapper.Map<Message>(model);
             if (model.img != null)
@@ -40,13 +40,17 @@ namespace Application.Services
                 var voiceUrl = await VoiceSavingHelper.SaveVoiceAsync(model.voice, "voices");
                 message.voice = voiceUrl;
             }
-            message.SentAt = DateTime.UtcNow;
-            message.IsSeen = false;
 
             await _unitOfWork.MessageRepository.AddMessageAsync(message);
             await _unitOfWork.SaveChangesAsync();
-            return message;
+
+            var fullMessage = await this.GetMessageAsync(message.MessageId);
+            var sendMessageResponse = _mapper.Map<SendMessageResponse>(message);
+            sendMessageResponse.IsRecipientOnline = fullMessage.Recipient.IsOnline;
+
+            return sendMessageResponse;
         }
+
 
         public async Task UpdateOnlineStatusAsync(string userId, bool isOnline)
         {
@@ -73,10 +77,10 @@ namespace Application.Services
             return _mapper.Map<IEnumerable<MessageViewModel>>(messages);
         }
 
-        public async Task MarkMessagesAsSeenAsync(int chatId)
+        public async Task MarkMessagesAsSeenAsync(int chatId, string senderId)
         {
             var messages = await _unitOfWork.MessageRepository.GetMessagesByChatIdAsync(chatId);
-            var unseenMessages = messages.Where(m => !m.IsSeen).ToList();
+            var unseenMessages = messages.Where(m => !m.IsSeen && m.SenderId != senderId).ToList();
 
             foreach (var message in unseenMessages)
             {
@@ -92,10 +96,14 @@ namespace Application.Services
 
             if (chat == null)
             {
+                var user1 = await _userService.getUserById(user1Id);
+                var user2 = await _userService.getUserById(user2Id);
                 chat = new Chat
                 {
                     User1Id = user1Id,
                     User2Id = user2Id,
+                    User1 = user1,
+                    User2 = user2,
                     CreatedAt = DateTime.Now
                 };
 
@@ -104,6 +112,17 @@ namespace Application.Services
             }
 
             return _mapper.Map<ChatViewModel>(chat);
+        }
+
+        public Task<Message> GetMessageAsync(int messageId)
+        {
+            var mes = _unitOfWork.MessageRepository.GetMessageByIdAsync(messageId);
+            if (mes != null)
+            {
+
+                return mes;
+            }
+            return null;
         }
 
     }

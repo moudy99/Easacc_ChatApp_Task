@@ -45,5 +45,16 @@ namespace Application.Services
             }
             return null;
         }
+
+        public async Task<ApplicationUser> getUserById(string userID)
+        {
+            var user = await _userManager.FindByIdAsync(userID);
+            if (user == null)
+            {
+                return null;
+            }
+            return user;
+        }
+
     }
 }
