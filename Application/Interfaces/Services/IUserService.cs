@@ -9,5 +9,8 @@ namespace Application.Interfaces.Services
         Task<ApplicationUser> FindByEmailAsync(string email);
 
         Task<ApplicationUser> UpdateUser(ApplicationUser user);
+        Task<ApplicationUser> getUserById(string userID);
+
+
     }
 }

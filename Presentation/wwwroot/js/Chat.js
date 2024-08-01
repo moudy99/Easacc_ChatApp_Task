@@ -21,16 +21,13 @@ function scrollToBottom() {
 }
 scrollToBottom();
 
-console.log(currentUserId);
-console.log(partnerId);
-console.log(chatId);
+
 
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("/chatHub")
     .build();
 
 connection.start().then(() => {
-    console.log("SignalR Connected");
 }).catch(err => console.error(err));
 
 connection.on("ReceiveMessage", (message) => {
@@ -143,6 +140,7 @@ function sendMessage() {
                 return response.json();
             })
             .then(data => {
+
                 console.log('Response Data:', data);
                 const message = `
                 <div class="partner-message">
@@ -158,6 +156,10 @@ function sendMessage() {
                             </a>
                         ` : ''}
                         ${data.voice ? `<audio controls src="http://localhost:35848/${data.voice}"></audio>` : ''}
+                       
+                         <div class="check-marks ${data.isRecipientOnline ? 'isRead' : ''}">
+                &#10004;&#10004;
+            </div>
                     </div>
                 </div>
             `;
@@ -175,57 +177,34 @@ function sendMessage() {
 }
 
 function addMessageToChat(message) {
-    console.log(message);
+
     const chatBody = document.getElementById("chatBody");
     const isMyMessage = message.senderId === currentUserId;
+    const messageClass = isMyMessage ? "partner-message" : "my-message";
+    const formattedTime = new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const content = message.content || "Voice message";
 
-    const messageDiv = document.createElement("div");
-    messageDiv.className = isMyMessage ? "my-message" : "partner-message";
+    const messageHTML = `
 
-    const contentDiv = document.createElement("div");
-    contentDiv.className = "message-content";
+        <div class="${messageClass}">
+      <img src="http://localhost:35848/imgs/defualt-user-img.png" alt="sender Image" class="user-image">
+            <div class="message-content">
+                <div class="message-text ${message.img || message.document || message.voice ? 'time-text-align' : ''}">
+                    <p>${content}</p>
+                    <span class="message-time">${formattedTime}</span>
+                </div>
+                ${message.img ? `<img class="message-img" src="http://localhost:35848/${message.img}" />` : ''}
+                ${message.document ? `
+                    <a href="http://localhost:35848/${message.document}" target="_blank" class="document-link">
+                        <i class="fas fa-file-download"></i> Download Document
+                    </a>
+                ` : ''}
+                ${message.voice ? `<audio controls src="http://localhost:35848/${message.voice}"></audio>` : ''}
+            </div>
+        </div>
+    `;
 
-    const contentP = document.createElement("p");
-    contentP.textContent = message.content;
-
-    const timeSpan = document.createElement("span");
-    timeSpan.className = "message-time";
-    timeSpan.textContent = new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    contentDiv.appendChild(contentP);
-    contentDiv.appendChild(timeSpan);
-
-    if (message.img) {
-        const img = document.createElement("img");
-        img.className = "message-img";
-        img.src = `http://localhost:35848/${message.img}`;
-        contentDiv.appendChild(img);
-    }
-
-    if (message.document) {
-        const docLink = document.createElement("a");
-        docLink.href = `http://localhost:35848/${message.document}`;
-        docLink.className = "document-link";
-        docLink.target = "_blank";
-
-        const icon = document.createElement("i");
-        icon.className = "fas fa-file-download";
-
-        docLink.appendChild(icon);
-        docLink.appendChild(document.createTextNode(" Download Document"));
-
-        contentDiv.appendChild(docLink);
-    }
-
-    if (message.voice) {
-        const audio = document.createElement("audio");
-        audio.controls = true;
-        audio.src = `http://localhost:35848/${message.voice}`;
-        contentDiv.appendChild(audio);
-    }
-
-    messageDiv.appendChild(contentDiv);
-    chatBody.appendChild(messageDiv);
+    chatBody.insertAdjacentHTML('beforeend', messageHTML);
     chatBody.scrollTop = chatBody.scrollHeight;
 }
 

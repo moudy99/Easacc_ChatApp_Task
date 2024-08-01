@@ -205,7 +205,7 @@ body {
     }
 
     .status-indicator.offline {
-        background-color: red;
+        background-color: #5b5c5e;
     }
 
 .chat-footer {
@@ -298,3 +298,12 @@ body {
     .document-link i {
         margin-right: 5px;
     }
+
+.check-marks{
+    10px;
+    color:#333;
+    padding:8px;
+}
+.isRead {
+    color: red;
+}

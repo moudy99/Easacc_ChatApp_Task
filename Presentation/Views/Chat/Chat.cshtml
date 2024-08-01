@@ -5,6 +5,9 @@
     var currentUserId = ViewBag.currentUserId;
     var role = ViewBag.currentUserRole;
     var partner = Model.User1.UserId == currentUserId ? Model.User2 : Model.User1;
+
+    var serializedChatData = Newtonsoft.Json.JsonConvert.SerializeObject(Model);
+
 }
 
 
@@ -70,6 +73,13 @@
                             <source src="@message.voice" type="audio/wav">
                         </audio>
                     }
+                    @if (message.SenderId == currentUserId)
+                    {
+                        <div class="@(message.IsSeen ? "check-marks isRead" : "check-marks")">
+                            &#10004;&#10004;
+                        </div>
+                    }
+                 
              
                 </div>
 
@@ -94,6 +104,11 @@
     </div>
 
 <script>
+
+        var data = @Html.Raw(serializedChatData);
+        console.log(data);
+
+
     window.chatData = {
         currentUserId: '@currentUserId',
         partnerId: '@partner.UserId',

@@ -5,7 +5,6 @@ namespace Application.Helpers
     public static class VoiceSavingHelper
     {
         private static readonly string BasePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "voices");
-        private static readonly HashSet<string> AllowedExtensions = new HashSet<string> { ".mp3", ".wav" };
 
         static VoiceSavingHelper()
         {
@@ -23,10 +22,7 @@ namespace Application.Helpers
             }
 
             var fileExtension = Path.GetExtension(file.FileName);
-            if (!AllowedExtensions.Contains(fileExtension.ToLower()))
-            {
-                throw new ArgumentException("Unsupported file format.");
-            }
+
 
 
             string uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
